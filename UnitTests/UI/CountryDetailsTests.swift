@@ -10,9 +10,6 @@ import XCTest
 import ViewInspector
 @testable import CountriesSwiftUI
 
-extension CountryDetails: Inspectable { }
-extension DetailRow: Inspectable { }
-
 final class CountryDetailsTests: XCTestCase {
     
     let country = Country.mockedData[0]
@@ -77,7 +74,7 @@ final class CountryDetailsTests: XCTestCase {
             .loaded(Country.Details.mockedData[0])
         )
         let exp = sut.inspection.inspect { view in
-            XCTAssertNoThrow(try view.find(SVGImageView.self))
+            XCTAssertNoThrow(try view.find(ImageView.self))
             XCTAssertNoThrow(try view.find(DetailRow.self).find(text: self.country.alpha3Code))
             interactors.verify()
         }
@@ -111,14 +108,7 @@ final class CountryDetailsTests: XCTestCase {
     }
     
     func test_sheetPresentation() {
-        let images: [MockedImagesInteractor.Action]
-        if #available(iOS 14.0, *) {
-            // Image is requested by Details sheet only:
-            images = [.loadImage(country.flag)]
-        } else {
-            // Image is requested by CountryDetails and Details sheet:
-            images = [.loadImage(country.flag), .loadImage(country.flag)]
-        }
+        let images: [MockedImagesInteractor.Action] = [.loadImage(country.flag), .loadImage(country.flag)]
         let interactors = DIContainer.Interactors.mocked(
             imagesInteractor: images
         )
@@ -126,7 +116,7 @@ final class CountryDetailsTests: XCTestCase {
         XCTAssertFalse(container.appState.value.routing.countryDetails.detailsSheet)
         let sut = CountryDetails(country: country, details: .loaded(Country.Details.mockedData[0]))
         let exp1 = sut.inspection.inspect { view in
-            try view.find(SVGImageView.self).callOnTapGesture()
+            try view.find(ImageView.self).callOnTapGesture()
         }
         let exp2 = sut.inspection.inspect(after: 0.5) { view in
             XCTAssertTrue(container.appState.value.routing.countryDetails.detailsSheet)
